@@ -1,0 +1,15 @@
+1) Indexer
+	a) Index Files			[DONE]
+	b) Fix Folder Size
+	c) Get Folder Free Space
+2) Upload
+	a) Send files to one server
+	b) Split files and send to multiple servers
+3) Download
+	a) Download from one server
+	b) Download from multiple server
+4) Server setup
+	a) Look for servers
+	b) Run as server
+5) Redundancy
+6) GUI
