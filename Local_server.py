@@ -24,34 +24,44 @@ def host_server(PORT=12345, LIMIT=1):
 	print "Socket listening on port ",PORT
 
 	while True:
-		c, addr = s.accept()     # Establish connection with client.
-		print 'Got connection from', addr
-		c.send('Connection successful')
-		interact(c)
+		try:
+			c, addr = s.accept()     # Establish connection with client.
+			print 'Got connection from', addr
+			c.send('Connection successful')
+			interact(c)
+			c.close()
+		except KeyboardInterrupt:
+			break
 
 	s.close()
-
 
 def interact(c):
 	msg = c.recv(1024)
 	if msg == "FILE_LIST":
 		# while True:
+		print "Request Received"
 		indexer = Indexer(root)
 		curr_directory, folders, files = indexer.get_dir_details()
-		c.send(curr_directory)
+		c.send(curr_directory+"\n")
 		for item in folders:
 			c.send(item+'\n')
 		c.send("\n")
 		for item in files:
-			c.send(item[0]+'\t'+item[1]+'\n')
-		c.send("\n")
-		c.close()
-		# choice = c.recv(1024)
-		# if choice == "-1": return
-		# elif choice <= len(folders): indexer.make_choice(int(choice))
-		# else: 
-		# 	send_file(indexer.get_file_name(int(choice)))
-		# return
+			c.send(item[0]+'    '+str(item[1])+"\n")
+		c.send("/")
+		# c.close()
+		print "SENT"
+		choice = c.recv(1024)
+		print choice
+		if choice == "-1": return
+		elif int(choice) <= len(folders): 
+			indexer.make_choice(int(choice))
+			curr_directory, folders, files = indexer.get_dir_details()
+			print curr_directory
+
+		else: 
+			send_file(indexer.get_file_path(int(choice)))
+		return
 	return
 
 def send_file(file_path):

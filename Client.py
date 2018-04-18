@@ -2,43 +2,49 @@ import socket               # Import socket module
 import random
 def interact(c):
 	c.send("FILE_LIST")
+	print "Request Sent"
 	# while True:
 	# curr_directory = c.recv(1024)
 	# print curr_directory
-	i = 0
 	dir_details = ""
 	while True:
 		msg = c.recv(1024)
-		i+=1
 		if msg:
-			print msg
+			# print msg
 			dir_details += msg
+			if msg[-1]=="/":
+				break
 		else:
 			break
-	print i
+	# print dir_details
 	lines = dir_details.split("\n")
-	print lines
+	# print lines
+	curr_directory = lines[0]
+	i = 1
+	folders = []
+	files = []
+	while True:
+		if lines[i]=="": break
+		else: folders.append(lines[i])
+		i+=1
+	i+=1
+	while True:
+		if lines[i]=="/": break
+		else: files.append(lines[i])
+		i+=1
 
+	print curr_directory
+	print folders
+	print files
 
-	# n1 = 0
-	# msg = c.recv(1024)
-	# while msg!="/":
-	# 	print msg
-	# 	msg = c.recv(1024)
-	# 	n1+=1
+	option = input("\nPlease enter your choice. 0 to Go back. -1 to exit\n\n")
+	while option<-1 or option > len(folders)+len(files):
+		print "Invalid Input\n\n"
+		option = input("\nPlease enter your choice. 0 to Go back. -1 to exit\n\n")
+	c.send(str(option))
 
-	# msg = c.recv(1024)
-	# while msg!= "/" and msg !="":
-	# 	print msg,
-	# 	size = c.rev(1024)
-	# 	print size
-	# 	msg = c.recv(1024)
-
-	# option = input("\nPlease enter your choice. 0 to Go back. -1 to exit\n\n")
-	# c.send(option)
-
-	# if option ==-1:
-	# 	return
+	if option ==-1:
+		return
 
 def connect_to_server(PORT=12345, HOST=None):
 	# cretate a socket 

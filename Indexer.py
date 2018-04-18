@@ -32,7 +32,7 @@ class Indexer:
 		return self.mypath, self.folders, self.file_details
 
 	def make_choice(self, choice):
-		if option == 0:
+		if choice == 0:
 			if self.mypath==self.root:
 				return
 			index = self.mypath.rfind('/')
@@ -41,7 +41,7 @@ class Indexer:
 			self.mypath = join(self.mypath, self.folders[choice-1])
 
 	def get_file_path(self, choice):
-		return join(self.mypath,self.file_details[choice-self.n1][0])
+		return join(self.mypath,self.file_details[choice-self.n1-1][0])
 
 
 
