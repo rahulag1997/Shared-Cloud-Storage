@@ -29,7 +29,11 @@ def host_server(PORT = 12345, LIMIT = 1):
             c, addr = s.accept()  # Establish connection with client.
             print 'Got connection from', addr
             c.send('Connection successful')
-            interact(c)
+            msg = c.recv(1024)
+            if msg == "FILE_LIST":
+                interact(c)
+            elif msg == "UPLOAD":
+                recv_file(c)
             c.close()
             print "Disconnected Form client",addr
         except KeyboardInterrupt:
@@ -38,35 +42,69 @@ def host_server(PORT = 12345, LIMIT = 1):
     s.close()
 
 
+def check_space_availibility(size):
+    return True
+
+
+def recv_file(c):
+    print "Receiving File"
+    c.send("ACK")
+    msg = ""
+    full_msg = " "
+    while True:
+        msg = c.recv(1024)
+        if msg:
+            full_msg += msg
+            if msg[-1]=='/':
+                break
+    file_info = full_msg.split("\n")
+    size = int(file_info[0])
+    name = file_info[1]
+
+    if check_space_availibility(size):
+        c.send("ACK")
+    else:
+        c.send("NAK")
+        return
+
+    received = 0
+    f = open(name,'wb')
+    while received < size:
+        part = c.recv(1024)
+        f.write(part)
+        received += len(part)
+    f.close()
+    print "Received Successfully"
+    pass
+
+
 def interact(c):
-    msg = c.recv(1024)
-    if msg == "FILE_LIST":
-        # Create a indexer object
-        indexer = Indexer(root)
-        while True:
-            #  Get Directory details
-            curr_directory, folders, files = indexer.get_dir_details()
-            print "Current Directory :",curr_directory
-            #  Send the details to the client
+    # Create a indexer object
+    indexer = Indexer(root)
+    while True:
+        #  Get Directory details
+        curr_directory, folders, files = indexer.get_dir_details()
+        print "Current Directory :",curr_directory
+        #  Send the details to the client
 
-            c.send(curr_directory + "\n")
-            for item in folders:
-                c.send(item + '\n')
-            c.send("\n")
-            for item in files:
-                c.send(item[0] + '\n' + str(item[1]) + "\n")
-            c.send("/")
-            # Receive response from client
-            choice = c.recv(1024)
+        c.send(curr_directory + "\n")
+        for item in folders:
+            c.send(item + '\n')
+        c.send("\n")
+        for item in files:
+            c.send(item[0] + '\n' + str(item[1]) + "\n")
+        c.send("/")
+        # Receive response from client
+        choice = c.recv(1024)
 
-            # Is -1 disconnect
-            if choice == "-1":
-                print "Disconnecting from Client"
-                return
-            elif int(choice) <= len(folders):  # Change directory if folder is selected
-                indexer.make_choice(int(choice))
-            else:
-                send_file(c, indexer.get_file_path(int(choice))) #Send file if file is selected
+        # Is -1 disconnect
+        if choice == "-1":
+            print "Disconnecting from Client"
+            return
+        elif int(choice) <= len(folders):  # Change directory if folder is selected
+            indexer.make_choice(int(choice))
+        else:
+            send_file(c, indexer.get_file_path(int(choice))) #Send file if file is selected
     return
 
 
